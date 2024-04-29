@@ -13,7 +13,7 @@ type Card = {
 
 # 技术栈
 
-- nextjs app router vs remix js ?
+- nextjs app router \*
 - prisma + postgresql \*
 - editorjs vs tiptap vs lexical ?
 - tailwincss + shadcn/ui + cva \*
