@@ -17,6 +17,6 @@ type Card = {
 - prisma + postgresql \*
 - editorjs vs tiptap vs lexical ?
 - tailwincss + shadcn/ui + cva \*
-- headless ui + lucide icons
-- dnd-kit
+- headless ui + lucide icons + radix ui ?
+- dnd-kit ?
 - render
