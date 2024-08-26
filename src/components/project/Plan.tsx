@@ -11,7 +11,12 @@ export default function Plan() {
           <CardTitle>2024,4月 预算</CardTitle>
           <CardDescription>总预算 8,900。 剩余 2,000</CardDescription>
         </div>
-        <Button>保存</Button>
+        <div className="flex flex-row gap-2">
+          <Button variant={"outline"} size={"sm"}>
+            新建
+          </Button>
+          <Button size={"sm"}>保存</Button>
+        </div>
       </div>
       <div className="w-full flex flex-row justify-start items-center gap-4">
         <Label>三餐</Label>

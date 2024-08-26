@@ -27,6 +27,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import * as React from "react";
+import DialogBill from "../common/Dialogs/DialogBill";
 import { Button } from "../ui/button";
 
 const data: Payment[] = [
@@ -123,9 +124,7 @@ export default function BillList() {
 
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
-      <Button variant={"outline"} size={"sm"}>
-        记一笔
-      </Button>
+      <DialogBill />
       <div className="w-full">
         <div className="flex items-center pb-4">
           <Input

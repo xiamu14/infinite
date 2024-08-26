@@ -124,6 +124,9 @@ export default function Home() {
               <TabsTrigger value="account">账户</TabsTrigger>
               <TabsTrigger value="income">收入</TabsTrigger>
               <TabsTrigger value="plan">预算</TabsTrigger>
+              <TabsTrigger value="lend">借出</TabsTrigger>
+              <TabsTrigger value="grant">贷款</TabsTrigger>
+              <TabsTrigger value="statistic">统计</TabsTrigger>
             </TabsList>
             <TabsContent value="bill">
               <BillList />

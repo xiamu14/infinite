@@ -6,14 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import DialogAccount from "../common/Dialogs/DialogAccount";
 import { Button } from "../ui/button";
 export default function Account() {
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
       <div className="w-full flex flex-row items-center justify-start gap-2">
-        <Button variant={"outline"} size={"sm"}>
-          新建
-        </Button>
+        <DialogAccount />
       </div>
       <div className="w-full flex flex-row items-center justify-start gap-4">
         <Card className="w-[250px]">

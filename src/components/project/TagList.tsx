@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
+import DialogTag from "../common/Dialogs/DialogTag";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -18,9 +19,7 @@ export default function TagList() {
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
       <div className="w-full flex flex-row items-center justify-start gap-2">
-        <Button variant={"outline"} size={"sm"}>
-          新建
-        </Button>
+        <DialogTag />
         <Button variant={"destructive"} size={"sm"}>
           删除
         </Button>
