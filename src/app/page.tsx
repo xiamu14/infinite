@@ -1,5 +1,4 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { Separator } from "@/components/ui/separator";
@@ -26,8 +25,10 @@ import {
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import Account from "../components/project/Account";
+import BillList from "../components/project/BillList";
 import Income from "../components/project/Income";
 import Plan from "../components/project/Plan";
+import TagList from "../components/project/TagList";
 export default function Home() {
   const [date, setDate] = useState<Date>();
   return (
@@ -125,30 +126,10 @@ export default function Home() {
               <TabsTrigger value="plan">预算</TabsTrigger>
             </TabsList>
             <TabsContent value="bill">
-              <Button variant={"outline"} size={"sm"}>
-                记一笔
-              </Button>
+              <BillList />
             </TabsContent>
             <TabsContent value="tag">
-              <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
-                <div className="w-full flex flex-row items-center justify-start gap-2">
-                  <Button variant={"outline"} size={"sm"}>
-                    新建
-                  </Button>
-                  <Button variant={"destructive"} size={"sm"}>
-                    删除
-                  </Button>
-                </div>
-
-                <div className="w-full flex flex-row items-center justify-start gap-4">
-                  <Badge variant={"outline"}>三餐</Badge>
-                  <Badge variant={"outline"}>水果饮品</Badge>
-                  <Badge variant={"outline"}>房租</Badge>
-                  <Badge variant={"outline"}>房贷</Badge>
-                  <Badge variant={"outline"}>日常消费</Badge>
-                  <Badge>交通</Badge>
-                </div>
-              </div>
+              <TagList />
             </TabsContent>
             <TabsContent value="account">
               <div>
