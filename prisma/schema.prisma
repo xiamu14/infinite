@@ -13,10 +13,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Card {
+model Tag {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   title     String   @db.VarChar(255)
-  content   String?
 }
