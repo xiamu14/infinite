@@ -11,17 +11,27 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { mutate } from "swr";
 
 export default function DialogTag() {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size={"sm"}>
           新建
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <form action={createTag}>
+        <form
+          action={async (formData) => {
+            if (!formData.get("title")) return;
+            await createTag(formData);
+            setOpen(false);
+            mutate("/api/tag");
+          }}
+        >
           <DialogHeader>
             <DialogTitle>新建</DialogTitle>
             <DialogDescription></DialogDescription>

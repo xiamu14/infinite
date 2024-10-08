@@ -1,14 +1,18 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useSWR, { mutate } from "swr";
+import { delTag } from "../../actions/tag";
+import fetcher from "../../lib/fetcher";
 import DialogTag from "../common/Dialogs/DialogTag";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 
 export default function TagList() {
-  const [selected, setSelected] = useState("tag1");
+  const [selected, setSelected] = useState<number>();
+  const [tags, setTags] = useState<{ title: string; id: number }[]>([]);
   const getStatus = useCallback(
-    (value: string) => {
+    (value: number) => {
       if (selected === value) {
         return {};
       }
@@ -16,34 +20,49 @@ export default function TagList() {
     },
     [selected]
   );
+
+  const { data, error, isLoading } = useSWR("/api/tag", fetcher);
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      console.log("data", data);
+      setTags(data.data);
+      if (data.data.length > 0) {
+        setSelected(data.data[0].id);
+      }
+    }
+  }, [data, error, isLoading]);
+
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
       <div className="w-full flex flex-row items-center justify-start gap-2">
         <DialogTag />
-        <Button variant={"destructive"} size={"sm"}>
-          删除
-        </Button>
+        <form
+          action={async (formData) => {
+            if (!formData.get("id")) return;
+            await delTag(formData);
+            mutate("/api/tag");
+          }}
+        >
+          <input name="id" value={selected ?? ""} className="hidden" />
+          <Button variant={"destructive"} size={"sm"} type="submit">
+            删除
+          </Button>
+        </form>
       </div>
 
       <div className="w-full flex flex-row items-center justify-start gap-4">
-        <Badge {...getStatus("tag1")} onClick={() => setSelected("tag1")}>
-          三餐
-        </Badge>
-        <Badge {...getStatus("tag2")} onClick={() => setSelected("tag2")}>
-          水果饮品
-        </Badge>
-        <Badge {...getStatus("tag3")} onClick={() => setSelected("tag3")}>
-          房租
-        </Badge>
-        <Badge {...getStatus("tag4")} onClick={() => setSelected("tag4")}>
-          房贷
-        </Badge>
-        <Badge {...getStatus("tag5")} onClick={() => setSelected("tag5")}>
-          日常消费
-        </Badge>
-        <Badge {...getStatus("tag6")} onClick={() => setSelected("tag6")}>
-          交通
-        </Badge>
+        {tags.map((item) => {
+          return (
+            <Badge
+              key={item.id}
+              {...getStatus(item.id)}
+              onClick={() => setSelected(item.id)}
+            >
+              {item.title}
+            </Badge>
+          );
+        })}
       </div>
       <div className="w-full border rounded-lg p-6">
         <p>月预算 ￥ xxx</p>
