@@ -1,8 +1,10 @@
 "use client";
+import { Tag } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import { delTag } from "../../actions/tag";
 import fetcher from "../../lib/fetcher";
+import { apisRoute } from "../../utils/constant";
 import DialogTag from "../common/Dialogs/DialogTag";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -10,7 +12,7 @@ import { Separator } from "../ui/separator";
 
 export default function TagList() {
   const [selected, setSelected] = useState<number>();
-  const [tags, setTags] = useState<{ title: string; id: number }[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const getStatus = useCallback(
     (value: number) => {
       if (selected === value) {
@@ -21,11 +23,10 @@ export default function TagList() {
     [selected]
   );
 
-  const { data, error, isLoading } = useSWR("/api/tag", fetcher);
+  const { data, error, isLoading } = useSWR(apisRoute.GetTags, fetcher<Tag[]>);
 
   useEffect(() => {
-    if (!isLoading && !error) {
-      console.log("data", data);
+    if (!isLoading && !error && data) {
       setTags(data.data);
       if (data.data.length > 0) {
         setSelected(data.data[0].id);
@@ -41,7 +42,7 @@ export default function TagList() {
           action={async (formData) => {
             if (!formData.get("id")) return;
             await delTag(formData);
-            mutate("/api/tag");
+            mutate(apisRoute.GetTags);
           }}
         >
           <input name="id" value={selected ?? ""} className="hidden" />
