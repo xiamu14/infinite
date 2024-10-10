@@ -21,10 +21,27 @@ model Tag {
 }
 
 model Account {
+  id        Int           @id @default(autoincrement())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  title     String        @unique @db.VarChar(255)
+  balance   Float
+  note      String?
+  status    AccountStatus @default(ACTIVE)
+  incomes   Income[]
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Income {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  title     String   @unique @db.VarChar(255)
-  balance   Float
+  money     Float
   note      String?
+  account   Account? @relation(fields: [accountId], references: [id])
+  accountId Int?
 }

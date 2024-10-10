@@ -8,15 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Account, Income as IncomeType } from "@prisma/client";
+import useSWR from "swr";
+import fetcher from "../../lib/fetcher";
+import { apisRoute } from "../../utils/constant";
 import DialogIncome from "../common/Dialogs/DialogIncome";
-const invoices = [
-  {
-    account: "平安银行卡",
-    totalAmount: "25000",
-    description: "工资",
-  },
-];
+
 export default function Income() {
+  const { data, error, isLoading } = useSWR(
+    apisRoute.GetIncomes,
+    fetcher<(IncomeType & { account: Account })[]>
+  );
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
       <DialogIncome />
@@ -31,13 +33,13 @@ export default function Income() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice.account}>
-                <TableCell className="font-medium">{invoice.account}</TableCell>
-                <TableCell>{invoice.totalAmount}</TableCell>
-                <TableCell className="text-right">
-                  {invoice.description}
+            {data?.data?.map((invoice) => (
+              <TableRow key={invoice.id}>
+                <TableCell className="font-medium">
+                  {invoice.account.title}
                 </TableCell>
+                <TableCell>{invoice.money}</TableCell>
+                <TableCell className="text-right">{invoice.note}</TableCell>
               </TableRow>
             ))}
           </TableBody>
