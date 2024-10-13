@@ -1,37 +1,53 @@
-import { Button } from "../ui/button";
+import { Plan as PlanType, Tag } from "@prisma/client";
+import { format } from "date-fns";
+import { useMemo } from "react";
+import useSWR from "swr";
+import { useSnapshot } from "valtio";
+import fetcher from "../../lib/fetcher";
+import { selectDateStore } from "../../store/common";
+import { apisRoute, dateLocalFormatYm } from "../../utils/constant";
+import DialogPlan from "../common/Dialogs/DialogPlan";
 import { CardDescription, CardTitle } from "../ui/card";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-
 export default function Plan() {
+  const { data, error, isLoading } = useSWR(
+    apisRoute.GetPlans,
+    fetcher<(PlanType & { tag: Tag })[]>
+  );
+  const total = useMemo(() => {
+    let money = 0;
+    if (data?.data) {
+      data.data.forEach((it) => (money += it.money));
+    }
+    return money;
+  }, [data]);
+  const selectDateSnap = useSnapshot(selectDateStore);
+
   return (
     <div className="w-full flex flex-col gap-4 border rounded-lg p-6">
       <div className="w-full flex flex-row justify-between items-center">
         <div className="flex flex-col gap-2 my-2">
-          <CardTitle>2024,4月 预算</CardTitle>
-          <CardDescription>总预算 8,900。 剩余 2,000</CardDescription>
+          <CardTitle>
+            {format(selectDateSnap.date!, dateLocalFormatYm)} 预算
+          </CardTitle>
+          <CardDescription>总预算 ￥{total}</CardDescription>
         </div>
         <div className="flex flex-row gap-2">
-          <Button variant={"outline"} size={"sm"}>
-            新建
-          </Button>
-          <Button size={"sm"}>保存</Button>
+          <DialogPlan />
         </div>
       </div>
-      <div className="w-full flex flex-row justify-start items-center gap-4">
-        <Label>三餐</Label>
-        <Input
-          value={2100}
-          placeholder="一日三餐"
-          className="w-[200px]"
-        ></Input>
-        <p className="text-sm text-muted-foreground">已消费 1200，剩余 900</p>
-      </div>
-      <div className="w-full flex flex-row justify-start items-center gap-4">
-        <Label>交通</Label>
-        <Input value={400} placeholder="一日三餐" className="w-[200px]"></Input>
-        <p className="text-sm text-muted-foreground">已消费 200，剩余 200</p>
-      </div>
+      {data?.data.map((item) => {
+        return (
+          <div
+            key={item.id}
+            className="w-full flex flex-row justify-start items-center gap-4"
+          >
+            <Label>{item.tag.title}</Label>
+            <p>{item.money}</p>
+            <p className="text-sm text-muted-foreground">已消费 - 剩余 -</p>
+          </div>
+        );
+      })}
     </div>
   );
 }

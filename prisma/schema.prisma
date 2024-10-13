@@ -18,6 +18,8 @@ model Tag {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   title     String   @unique @db.VarChar(255)
+  plans     Plan[]
+  bills     Bill[]
 }
 
 model Account {
@@ -29,6 +31,7 @@ model Account {
   note      String?
   status    AccountStatus @default(ACTIVE)
   incomes   Income[]
+  bills     Bill[]
 }
 
 enum AccountStatus {
@@ -44,4 +47,25 @@ model Income {
   note      String?
   account   Account? @relation(fields: [accountId], references: [id])
   accountId Int?
+}
+
+model Plan {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  money     Float
+  tag       Tag?     @relation(fields: [tagId], references: [id])
+  tagId     Int?
+}
+
+model Bill {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  money     Float
+  date      DateTime @default(now())
+  account   Account? @relation(fields: [accountId], references: [id])
+  accountId Int?
+  tag       Tag?     @relation(fields: [tagId], references: [id])
+  tagId     Int?
 }

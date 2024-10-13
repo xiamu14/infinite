@@ -33,7 +33,7 @@ export default function Account() {
               </CardHeader>
               <CardContent className="flex flex-col gap-1">
                 <p>{`余额：${item.balance}`}</p>
-                <p>消费记录 4 笔。</p>
+                <p></p>
                 <p className="text-sm text-muted-foreground mt-2">{`${item.note}`}</p>
               </CardContent>
               <CardFooter>

@@ -8,7 +8,6 @@ import { apisRoute } from "../../utils/constant";
 import DialogTag from "../common/Dialogs/DialogTag";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
 
 export default function TagList() {
   const [selected, setSelected] = useState<number>();
@@ -65,13 +64,13 @@ export default function TagList() {
           );
         })}
       </div>
-      <div className="w-full border rounded-lg p-6">
+      {/* <div className="w-full border rounded-lg p-6">
         <p>月预算 ￥ xxx</p>
         <p>月余额 ￥ xxx</p>
         <p>月消费 ￥ xxx</p>
         <Separator className="my-4" />
         <p>今日消费 ￥ xxx</p>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,11 +1,4 @@
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
   Table,
   TableBody,
   TableCell,
@@ -13,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Account, Bill as BillType, Tag } from "@prisma/client";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -25,40 +19,46 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
-import * as React from "react";
+import { format } from "date-fns";
+import dayjs from "dayjs";
+import { useMemo, useState } from "react";
+import useSWR, { mutate } from "swr";
+import { useSnapshot } from "valtio";
+import { delBill } from "../../actions/bill";
+import fetcher from "../../lib/fetcher";
+import { selectDateStore } from "../../store/common";
+import { apisRoute, dateFormatYm } from "../../utils/constant";
 import DialogBill from "../common/Dialogs/DialogBill";
 import { Button } from "../ui/button";
 
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    amount: 316,
-    tag: "三餐",
-    date: "2024.08.08",
-    account: "招商信用卡",
-  },
-];
-
 export type Payment = {
-  id: string;
-  amount: number;
-  tag: string;
+  id: number;
+  money: number;
+  tagName: string;
   date: string;
-  account: string;
+  accountName: string;
 };
 
 export const columns: ColumnDef<Payment>[] = [
   {
-    accessorKey: "date",
-    header: "日期",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("date")}</div>,
+    accessorKey: "id",
+    header: "ID",
+    cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "amount",
+    accessorKey: "date",
+    header: "日期",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {dayjs(row.getValue("date")).format("YYYY/MM/DD")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "money",
     header: "金额",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
+      const amount = parseFloat(row.getValue("money"));
 
       // Format the amount as a dollar amount
       const formatted = new Intl.NumberFormat("zh-CN", {
@@ -70,15 +70,17 @@ export const columns: ColumnDef<Payment>[] = [
     },
   },
   {
-    accessorKey: "tag",
+    accessorKey: "tagName",
     header: "分类",
-    cell: ({ row }) => <div className="lowercase">{row.getValue("tag")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("tagName")}</div>
+    ),
   },
   {
-    accessorKey: "account",
+    accessorKey: "accountName",
     header: "账户",
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("account")}</div>
+      <div className="lowercase">{row.getValue("accountName")}</div>
     ),
   },
   {
@@ -86,25 +88,62 @@ export const columns: ColumnDef<Payment>[] = [
     header: "操作",
     cell: ({ row }) => (
       <div>
-        <Button variant={"destructive"} size={"sm"}>
-          删除
-        </Button>
+        <form
+          action={async (formData) => {
+            await delBill(formData);
+            mutate(apisRoute.GetBills);
+          }}
+        >
+          <input name="id" value={row.getValue("id")} className="hidden" />
+          <Button variant={"destructive"} size={"sm"}>
+            删除
+          </Button>
+        </form>
       </div>
     ),
   },
 ];
 
 export default function BillList() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const selectDateSnap = useSnapshot(selectDateStore);
+  const searchParams = useMemo(() => {
+    if (!selectDateSnap.date) return "";
+    const search = new URLSearchParams();
+    search.append("month", format(selectDateSnap.date, dateFormatYm));
+    return search.toString();
+  }, [selectDateSnap.date]);
+  const { data, error, isLoading } = useSWR(
+    searchParams ? apisRoute.GetBills + `?${searchParams}` : apisRoute.GetBills,
+    fetcher<(BillType & { account: Account; tag: Tag })[]>
   );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
 
+  const bills = useMemo(() => {
+    if (data?.data) {
+      return data.data.map((item) => {
+        return {
+          id: item.id,
+          money: item.money,
+          date: item.date,
+          accountName: item.account.title,
+          tagName: item.tag.title,
+        };
+      }) as unknown as Payment[];
+    }
+    return [] as Payment[];
+  }, [data]);
+  const total = useMemo(() => {
+    let money = 0;
+    if (data?.data) {
+      data.data.map((it) => (money += it.money));
+    }
+    return money;
+  }, [data]);
   const table = useReactTable({
-    data,
+    data: bills,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -124,44 +163,11 @@ export default function BillList() {
 
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
-      <DialogBill />
+      <div className="flex justify-start items-center gap-2">
+        <p>消费总额：￥{total}</p>
+        <DialogBill />
+      </div>
       <div className="w-full">
-        <div className="flex items-center pb-4">
-          <Input
-            placeholder="Filter tags..."
-            value={(table.getColumn("tag")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("tag")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -183,7 +189,7 @@ export default function BillList() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {bills.length > 0 && table.getRowModel()?.rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
@@ -225,8 +231,12 @@ export default function BillList() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              onClick={() => {
+                if (bills.length > 0) {
+                  table?.nextPage();
+                }
+              }}
+              disabled={bills.length > 0 && table?.getCanNextPage()}
             >
               Next
             </Button>
