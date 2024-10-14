@@ -68,4 +68,5 @@ model Bill {
   accountId Int?
   tag       Tag?     @relation(fields: [tagId], references: [id])
   tagId     Int?
+  note      String?  @default("")
 }

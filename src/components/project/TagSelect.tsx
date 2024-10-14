@@ -13,8 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-
-export default function TagSelect() {
+interface Props {
+  onValueChange?: (value: string) => void;
+}
+export default function TagSelect(props: Props) {
   const { data, error, isLoading } = useSWR(
     apisRoute.GetTags,
     fetcher<TagType[]>
@@ -24,11 +26,17 @@ export default function TagSelect() {
     <>
       <Input
         name="tagId"
-        defaultValue=""
         value={value}
+        readOnly
         className="col-span-3 hidden"
       />
-      <Select value={value} onValueChange={setValue}>
+      <Select
+        value={value}
+        onValueChange={(value) => {
+          setValue(value);
+          props.onValueChange?.(value);
+        }}
+      >
         <SelectTrigger className="w-full" value={value}>
           <SelectValue placeholder="选择类目" />
         </SelectTrigger>

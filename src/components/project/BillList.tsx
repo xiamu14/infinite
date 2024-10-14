@@ -30,6 +30,7 @@ import { selectDateStore } from "../../store/common";
 import { apisRoute, dateFormatYm } from "../../utils/constant";
 import DialogBill from "../common/Dialogs/DialogBill";
 import { Button } from "../ui/button";
+import TagSelect from "./TagSelect";
 
 export type Payment = {
   id: number;
@@ -37,6 +38,7 @@ export type Payment = {
   tagName: string;
   date: string;
   accountName: string;
+  note: string;
 };
 
 export const columns: ColumnDef<Payment>[] = [
@@ -84,6 +86,13 @@ export const columns: ColumnDef<Payment>[] = [
     ),
   },
   {
+    accessorKey: "note",
+    header: "备注",
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("note") || "-"}</div>
+    ),
+  },
+  {
     accessorKey: "actions",
     header: "操作",
     cell: ({ row }) => (
@@ -94,7 +103,12 @@ export const columns: ColumnDef<Payment>[] = [
             mutate(apisRoute.GetBills);
           }}
         >
-          <input name="id" value={row.getValue("id")} className="hidden" />
+          <input
+            name="id"
+            value={row.getValue("id")}
+            className="hidden"
+            readOnly
+          />
           <Button variant={"destructive"} size={"sm"}>
             删除
           </Button>
@@ -110,12 +124,16 @@ export default function BillList() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const selectDateSnap = useSnapshot(selectDateStore);
+  const [filterTag, setFilterTag] = useState<string>();
   const searchParams = useMemo(() => {
     if (!selectDateSnap.date) return "";
     const search = new URLSearchParams();
     search.append("month", format(selectDateSnap.date, dateFormatYm));
+    if (filterTag) {
+      search.append("tag", filterTag);
+    }
     return search.toString();
-  }, [selectDateSnap.date]);
+  }, [selectDateSnap.date, filterTag]);
   const { data, error, isLoading } = useSWR(
     searchParams ? apisRoute.GetBills + `?${searchParams}` : apisRoute.GetBills,
     fetcher<(BillType & { account: Account; tag: Tag })[]>
@@ -163,9 +181,17 @@ export default function BillList() {
 
   return (
     <div className="w-[42vw] max-w-[1000px] min-w-[700px] flex flex-col items-start justify-start gap-4">
-      <div className="flex justify-start items-center gap-2">
-        <p>消费总额：￥{total}</p>
+      <div className="w-full flex justify-start items-center gap-2">
+        <p>消费总额：￥{total.toFixed(2)}</p>
         <DialogBill />
+        <div className="flex-1" />
+        <div className="w-[100px]">
+          <TagSelect
+            onValueChange={(value) => {
+              setFilterTag(value);
+            }}
+          />
+        </div>
       </div>
       <div className="w-full">
         <div className="rounded-md border">
@@ -226,7 +252,7 @@ export default function BillList() {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              Previous
+              上一页
             </Button>
             <Button
               variant="outline"
@@ -238,7 +264,7 @@ export default function BillList() {
               }}
               disabled={bills.length > 0 && table?.getCanNextPage()}
             >
-              Next
+              下一页
             </Button>
           </div>
         </div>

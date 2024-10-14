@@ -27,6 +27,7 @@ export default function AccountSelect() {
         defaultValue=""
         value={value}
         className="col-span-3 hidden"
+        readOnly
       />
       <Select value={value} onValueChange={setValue}>
         <SelectTrigger className="w-full" value={value}>

@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Account, Income as IncomeType } from "@prisma/client";
 import { useMemo } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
+import { delIncome } from "../../actions/income";
 import fetcher from "../../lib/fetcher";
 import { apisRoute } from "../../utils/constant";
 import DialogIncome from "../common/Dialogs/DialogIncome";
@@ -51,9 +52,16 @@ export default function Income() {
                 <TableCell className="text-center">￥{invoice.money}</TableCell>
                 <TableCell className="text-center">{invoice.note}</TableCell>
                 <TableCell className="text-center">
-                  <Button variant={"destructive"} size={"sm"} type="submit">
-                    删除
-                  </Button>
+                  <form
+                    action={async () => {
+                      await delIncome(invoice.id);
+                      mutate(apisRoute.GetIncomes);
+                    }}
+                  >
+                    <Button variant={"destructive"} size={"sm"} type="submit">
+                      删除
+                    </Button>
+                  </form>
                 </TableCell>
               </TableRow>
             ))}

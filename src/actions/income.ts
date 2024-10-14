@@ -11,6 +11,6 @@ export async function createIncome(formData: FormData) {
   });
 }
 
-export async function delIncome(formData: FormData) {
-  await prisma.income.delete({ where: { id: Number(formData.get("id")) } });
+export async function delIncome(id: number) {
+  await prisma.income.delete({ where: { id } });
 }

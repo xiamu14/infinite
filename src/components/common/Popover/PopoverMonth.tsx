@@ -15,7 +15,12 @@ export default function PopoverMonth({ onMontChange }: Props) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <input name="month" value={month?.toString() ?? ""} className="hidden" />
+      <input
+        name="month"
+        value={month?.toString() ?? ""}
+        className="hidden"
+        readOnly
+      />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

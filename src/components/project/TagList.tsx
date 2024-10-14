@@ -44,7 +44,7 @@ export default function TagList() {
             mutate(apisRoute.GetTags);
           }}
         >
-          <input name="id" value={selected ?? ""} className="hidden" />
+          <input name="id" value={selected ?? ""} className="hidden" readOnly />
           <Button variant={"destructive"} size={"sm"} type="submit">
             删除
           </Button>

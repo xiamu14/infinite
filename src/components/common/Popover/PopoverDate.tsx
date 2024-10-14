@@ -11,7 +11,12 @@ export default function PopoverDate() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <input name="date" value={date?.toString() ?? ""} className="hidden" />
+      <input
+        name="date"
+        value={date?.toString() ?? ""}
+        className="hidden"
+        readOnly
+      />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
